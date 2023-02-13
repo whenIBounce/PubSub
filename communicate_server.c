@@ -205,7 +205,7 @@ join_1_svc(char *IP, int Port,  struct svc_req *rqstp)
         result = 0;
     }
 
-    send_message(IP, Port, "hello wulala"); //test send_message in join
+    \\ send_message(IP, Port, "hello wulala"); //test send_message in join
 
 	printf("Client joined with IP: %s and Port: %d\n", IP, Port);
 
