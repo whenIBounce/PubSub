@@ -92,11 +92,30 @@ bool_t clientJoined(char *IP, int Port) {
 }
 
 bool_t isArticleValidForSubscription(char *article) {
+
     char type[MAXSTRING], originator[MAXSTRING], org[MAXSTRING], contents[MAXSTRING];
+
+    memset(type, '\0', MAXSTRING);
+    memset(originator, '\0', MAXSTRING);
+    memset(org, '\0', MAXSTRING);
+    memset(contents, '\0', MAXSTRING);
+
     int fields = sscanf(article, "%[^;];%[^;];%[^;];%[^;]", type, originator, org, contents);
 
-    if (fields < 3) {
+    // printf("Type: %s  Originator: %s  Org: %s   Contents: %s\n", type, originator, org, contents);
+
+    if (fields != 4 || strlen(article) > MAXSTRING) {
         // Invalid article string
+        return 0;
+    }
+
+    if (strlen(contents) != 0) {
+        // Contents field is not empty
+        return 0;
+    }
+
+    if (strlen(type) == 0 && strlen(originator) == 0 && strlen(org) == 0) {
+        // None of the first three fields are present
         return 0;
     }
 
@@ -109,19 +128,22 @@ bool_t isArticleValidForSubscription(char *article) {
         strcmp(type, "Politics") != 0 &&
         strcmp(type, "Health") != 0) {
         // Invalid type field
-        return 0;
-    }
-
-    if (fields == 4 && strlen(contents) > 0) {
-        // Contents field must be empty for subscription
+        printf("Invalid type");
         return 0;
     }
 
     return 1;
 }
 
+
 bool_t isArticleValidForPublication(char *article) {
     char type[MAXSTRING], originator[MAXSTRING], org[MAXSTRING], contents[MAXSTRING];
+
+    memset(type, '\0', MAXSTRING);
+    memset(originator, '\0', MAXSTRING);
+    memset(org, '\0', MAXSTRING);
+    memset(contents, '\0', MAXSTRING);
+
     int fields = sscanf(article, "%[^;];%[^;];%[^;];%[^;]", type, originator, org, contents);
 
     if (fields != 4 || strlen(article) > MAXSTRING) {

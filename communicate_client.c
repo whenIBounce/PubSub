@@ -129,24 +129,11 @@ void communicate_prog_1(char *host) {
     if (result_1 == (bool_t *) NULL) {
         clnt_perror (clnt, "call failed");
     }
-    // result_2 = leave_1(leave_1_IP, leave_1_Port, clnt);
-	// if (result_2 == (bool_t *) NULL) {
-	// 	clnt_perror (clnt, "call failed");
-	// }
+
 	result_3 = subscribe_1(subscribe_1_IP, subscribe_1_Port, subscribe_1_Article, clnt);
 	if (result_3 == (bool_t *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
-    // // Unsubscribe for the first time, success
-    // result_4 = unsubscribe_1(unsubscribe_1_IP, unsubscribe_1_Port, unsubscribe_1_Article, clnt);
-	// if (result_4 == (bool_t *) NULL) {
-	// 	clnt_perror (clnt, "call failed");
-	// }
-    // // Unsubscribe again, failed
-    // result_4 = unsubscribe_1(unsubscribe_1_IP, unsubscribe_1_Port, unsubscribe_1_Article, clnt);
-	// if (result_4 == (bool_t *) NULL) {
-	// 	clnt_perror (clnt, "call failed");
-	// }
 
     /* Create a thread to receive UDP messages from the server */
     pthread_t thread;
