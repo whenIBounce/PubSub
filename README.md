@@ -1,5 +1,10 @@
 # PubSub
 
+## Group Member and Contribution
+Yidan Wang : Testing
+Tianhong Zhang : Join, Leave, Subscribe, Unsubscribe, Publish, UDP message
+Minrui Tian : Ping, Subscribe, Unsubscribe
+
 ## How to run:
 
 Open a terminal window:
