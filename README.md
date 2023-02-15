@@ -75,6 +75,19 @@ The code includes several helper functions that are used in the RPC functions:
 
 ### Client
 
+## Test
+
+The purpose of the function Test1() test the server-client communication system using remote procedure calls (RPC) over User Datagram Protocol (UDP).
+The code sets up two UDP client sockets, binds them to specific ports, and gets their IP and port values. The code then sets up two clients by calling rpc_setup with the host parameter and uses them to join a server and subscribe to certain articles. The code then publishes an article using one client and receives it using the other client. Finally, the function creates two threads, one to receive UDP messages and the other to check the server status, and destroys the two client handles.
+Test 1 exercise some basic functionality of the server-client system, such as joining the server, subscribing to articles, and publishing articles.
+Test cases:
+some basic functionality of join, subscribe
+The simultaneous join of 2 clients
+the simultaneous subscribe of 2 clients
+the interaction of 2 clients: 1 client subscribe and another publish.
+Since we did not design a user input interface, you can run the test and communicate_prog_1 to see the basics functionality of the system.
+To run test and communicate_prog_1, just simply enter ./communicate_client in the terminal after make and gcc
+
 The client implementation for a news subscription service uses Remote Procedure Calls (RPC).
 
 The code creates a UDP socket and binds it to a specific port. The IP address and port are **hardcoded** for every client. It then sends RPC requests to the server to join, subscribe, unsubscribe, publich, leave, etc. 
