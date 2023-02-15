@@ -1,9 +1,9 @@
 # PubSub
 
 ## Group Member and Contribution
-Yidan Wang : Testing
-Tianhong Zhang : Join, Leave, Subscribe, Unsubscribe, Publish, UDP message
-Minrui Tian : Ping, Subscribe, Unsubscribe
+- Yidan Wang : Testing
+- Tianhong Zhang : Join, Leave, Subscribe, Unsubscribe, Publish, UDP message, communicate_client.c
+- Minrui Tian : Ping, Subscribe, Unsubscribe
 
 ## How to run:
 
