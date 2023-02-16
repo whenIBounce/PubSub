@@ -72,18 +72,15 @@ void communicate_prog_1(char *host) {
     int client_Port; 
 
     bool_t *result_1;
-
     bool_t  *result_2;
 
 
 
 	bool_t  *result_3;
 
-	char *subscribe_1_Article = "Health;oo;haha;";
 
     bool_t  *result_4;
 
-	char *unsubscribe_1_Article = "Health;oo;haha;";
 
     /* Create a socket */
     int sockfd;
@@ -116,7 +113,6 @@ void communicate_prog_1(char *host) {
 
     printf("Client IP: %s, Port: %d\n", client_IP, client_Port);
 
-    
 
     /* Send RPC request to the server */
     clnt = rpc_setup(host);
@@ -124,11 +120,6 @@ void communicate_prog_1(char *host) {
     if (result_1 == (bool_t *) NULL) {
         clnt_perror (clnt, "call failed");
     }
-
-	result_3 = subscribe_1(client_IP, client_Port, subscribe_1_Article, clnt);
-	if (result_3 == (bool_t *) NULL) {
-		clnt_perror (clnt, "call failed");
-	}
 
     bool_t  *a;
     bool_t  *b;
@@ -138,8 +129,10 @@ void communicate_prog_1(char *host) {
     char * str1 = "Sports; org; ;";
     char * str2 = "Politics;ori; ;";
     char * str3 = ";ori;org ;";
-    char * str4 = ";ori;org ;contents";
+    char * str4 = ";ori; ;contents";
     char * str5 = "gaga;ss;ss;ss";
+    char * str6 = ";;;whatabout";
+    char * str7 = "Entertainment;Carrie's Eating Club;CSBSJU;NoEntertainmentInCSBSJU";
 
     a = subscribe_1(client_IP, client_Port, str1, clnt);
     b = subscribe_1(client_IP, client_Port, str2, clnt);
@@ -152,9 +145,15 @@ void communicate_prog_1(char *host) {
     bool_t  *p3;
     bool_t  *p4;
     bool_t  *p5;
-
-
-
+    bool_t  *p6;
+    bool_t  *p7;
+    p1 = publish_1(str1, client_IP, client_Port,clnt);
+    p2 = publish_1(str2, client_IP, client_Port, clnt);
+    p3 = publish_1(str3, client_IP, client_Port, clnt);
+    p4 = publish_1(str4, client_IP, client_Port, clnt);
+    p5 = publish_1(str5, client_IP, client_Port, clnt);
+    p6 = publish_1(str6, client_IP, client_Port, clnt);
+    p7 = publish_1(str7, client_IP, client_Port, clnt);
 
     /* Create a thread to receive UDP messages from the server */
     pthread_t udp_thread;

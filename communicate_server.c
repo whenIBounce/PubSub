@@ -32,8 +32,7 @@ struct ClientInfo
 struct ClientInfo clients[MAX_CLIENTS];
 int numClients = 0;
 
-// send UDP message to the specified client
-// later change to message
+/* send UDP message to the specified client */
 void send_message(char *IP, int Port, char *message)
 {
     int sockfd;
@@ -118,7 +117,7 @@ int split(const char *str, char ***arr)
     }
 
     // then dynamically allocates an array of pointers to characters that will hold each of the substrings.
-    *arr = (char **)malloc(sizeof(char *) * count);
+    *arr = (char **)calloc(count, sizeof(char *));
     if (*arr == NULL)
         exit(1);
 
@@ -169,7 +168,7 @@ int split(const char *str, char ***arr)
     return count;
 }
 
-bool_t isArticleValidForSubscription(char *article)
+bool_t isArticleValid(char *article, int flag) //flag = 1, check for subscription; otherwise, check for publication
 {
     char ** fields;
     fields = NULL;
@@ -213,9 +212,16 @@ bool_t isArticleValidForSubscription(char *article)
                 zeros_count++;
             }
         }else if(j==3){
-            if(fields[3] != NULL){
-                printf("Contents must be empty; ");
-                return 0;
+            if(flag){
+                if(fields[3] != NULL){
+                    printf("Contents must be empty; ");
+                    return 0;
+                }
+            }else{
+                if(fields[3] == NULL){
+                    printf("No contents; ");
+                    return 0;
+                }
             }
         }
     }
@@ -229,51 +235,6 @@ bool_t isArticleValidForSubscription(char *article)
         free(fields[j]);
     }
     free(fields);
-
-    return 1;
-}
-
-bool_t isArticleValidForPublication(char *article)
-{
-    char type[MAXSTRING], originator[MAXSTRING], org[MAXSTRING], contents[MAXSTRING];
-
-    memset(type, '\0', MAXSTRING);
-    memset(originator, '\0', MAXSTRING);
-    memset(org, '\0', MAXSTRING);
-    memset(contents, '\0', MAXSTRING);
-
-    int fields = sscanf(article, "%[^;];%[^;];%[^;];%[^;]", type, originator, org, contents);
-
-    if (fields != 4 || strlen(article) > MAXSTRING)
-    {
-        // Invalid article string
-        return 0;
-    }
-
-    if (strlen(contents) == 0)
-    {
-        // Contents field is empty
-        return 0;
-    }
-
-    if (strlen(type) == 0 && strlen(originator) == 0 && strlen(org) == 0)
-    {
-        // None of the first three fields are present
-        return 0;
-    }
-
-    if (strcmp(type, "Sports") != 0 &&
-        strcmp(type, "Lifestyle") != 0 &&
-        strcmp(type, "Entertainment") != 0 &&
-        strcmp(type, "Business") != 0 &&
-        strcmp(type, "Technology") != 0 &&
-        strcmp(type, "Science") != 0 &&
-        strcmp(type, "Politics") != 0 &&
-        strcmp(type, "Health") != 0)
-    {
-        // Invalid type field
-        return 0;
-    }
 
     return 1;
 }
@@ -293,6 +254,7 @@ bool_t alreadySubscribed(int clientIndex, char *Article)
             return 1;
         }
     }
+
     return 0;
 }
 
@@ -404,8 +366,9 @@ bool_t *subscribe_1_svc(char *IP, int Port, char *Article, struct svc_req *rqstp
             break;
         }
     }
-
-    if (!isArticleValidForSubscription(Article))
+     
+    int flag = 1;
+    if (!isArticleValid(Article, flag))
     {
         result = 0;
         printf("Subscribe Failed, Article '%s' is not valid for subscription.\n", Article);
@@ -431,9 +394,8 @@ bool_t *subscribe_1_svc(char *IP, int Port, char *Article, struct svc_req *rqstp
     return &result;
 }
 
-bool_t
-    *
-    unsubscribe_1_svc(char *IP, int Port, char *Article, struct svc_req *rqstp)
+bool_t *
+unsubscribe_1_svc(char *IP, int Port, char *Article, struct svc_req *rqstp)
 {
     static bool_t result;
 
@@ -453,8 +415,8 @@ bool_t
             break;
         }
     }
-
-    if (!isArticleValidForSubscription(Article))
+    int flag = 1;
+    if (!isArticleValid(Article, flag))
     {
         result = 0;
         printf("Unsubscribe Failed, Article '%s' is not valid for subscription.\n", Article);
@@ -501,7 +463,8 @@ publish_1_svc(char *Article, char *IP, int Port, struct svc_req *rqstp)
     static bool_t result;
 
     // Check if the article is valid for publishing
-    if (!isArticleValidForPublication(Article))
+    int flag = 0;
+    if (!isArticleValid(Article, flag))
     {
         result = 0;
         printf("Publish Failed, Article '%s' is not valid for publishing.\n", Article);
@@ -551,6 +514,5 @@ ping_1_svc(struct svc_req *rqstp)
     /*
      * insert server code heres
      */
-    printf("ping function called\n");
     return &result;
 }
