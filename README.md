@@ -68,9 +68,9 @@ The code includes several helper functions that are used in the RPC functions:
 
 2. `bool_t clientJoined(char *IP, int Port)` - This function checks if a client with a specified IP and Port has already joined the server.
 
-3. `bool_t isArticleValidForSubscription(char *article)` - This function checks if a given article is valid for subscription. An article is valid for subscription if it has a valid type, originator, and organization, and the contents field is empty.
+3. `int split(char *str, char ***arr)` - This function split the str into units separated by ";", store them in arr and return the number of units.
 
-4. `bool_t isArticleValidForPublication(char *article)` - This function checks if a given article is valid for publication. An article is valid for publication if it has a valid type, originator, and organization, and the contents field is non-empty.
+4. `bool_t isArticleValidForSubscription(char *article)` - This function checks if a given article is valid for subscription or publication. 
 
 5. `bool_t alreadySubscribed(int clientIndex, char *Article)` - This function checks if a specified article is already subscribed by a given client.
 
