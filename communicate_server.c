@@ -5,6 +5,8 @@
  */
 
 #include "communicate.h"
+#include <pthread.h>
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,6 +22,9 @@
 #define MAX_CLIENTS 100
 #define MAX_SUBSCRIPTIONS 10
 #define MAXSTRING 120
+
+
+pthread_mutex_t client_lock = PTHREAD_MUTEX_INITIALIZER;
 
 struct ClientInfo
 {
@@ -288,6 +293,7 @@ join_1_svc(char *IP, int Port, struct svc_req *rqstp)
             return &result;
         }
     }
+    pthread_mutex_lock(&client_lock);
 
     /* Add the new client to the list of clients */
     if (numClients < MAX_CLIENTS)
@@ -296,6 +302,7 @@ join_1_svc(char *IP, int Port, struct svc_req *rqstp)
         clients[numClients].Port = Port;
         numClients++;
         result = 1;
+         pthread_mutex_unlock(&client_lock);
     }
     else
     {
@@ -331,6 +338,7 @@ leave_1_svc(char *IP, int Port, struct svc_req *rqstp)
         printf("Leave Failed, Client with IP: %s and Port: %d has not joined the server\n", IP, Port);
         return &result;
     }
+    pthread_mutex_lock(&client_lock);
 
     /* Remove the client from the list of clients */
     for (int i = clientIndex; i < numClients - 1; i++)
@@ -338,6 +346,7 @@ leave_1_svc(char *IP, int Port, struct svc_req *rqstp)
         clients[i] = clients[i + 1];
     }
     numClients--;
+    pthread_mutex_unlock(&client_lock);
 
     result = 1;
     printf("Client with IP: %s and Port: %d has left the server\n", IP, Port);
@@ -380,7 +389,7 @@ bool_t *subscribe_1_svc(char *IP, int Port, char *Article, struct svc_req *rqstp
         printf("Subscribe Failed, Article '%s' is already subscribed by client with IP: %s and Port: %d\n", Article, IP, Port);
         return &result;
     }
-
+     pthread_mutex_lock(&client_lock);
     if (subscribeArticle(clientIndex, Article))
     {
         result = 1;
@@ -389,7 +398,7 @@ bool_t *subscribe_1_svc(char *IP, int Port, char *Article, struct svc_req *rqstp
     {
         result = 0;
     }
-
+    pthread_mutex_unlock(&client_lock);
     return &result;
 }
 
@@ -397,6 +406,7 @@ bool_t *
 unsubscribe_1_svc(char *IP, int Port, char *Article, struct svc_req *rqstp)
 {
     static bool_t result;
+    pthread_mutex_lock(&client_lock);
 
     if (!clientJoined(IP, Port))
     {
@@ -450,6 +460,7 @@ unsubscribe_1_svc(char *IP, int Port, char *Article, struct svc_req *rqstp)
                 break;
             }
     }
+    pthread_mutex_unlock(&client_lock);
 
     if (unsubscribed)
     {

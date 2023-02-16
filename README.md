@@ -2,24 +2,21 @@
 
 ## Group Member and Contribution
 - Yidan Wang : Testing
-- Tianhong Zhang : Join, Leave, Subscribe, Unsubscribe, Publish, UDP message, communicate_client.c
+- Tianhong Zhang : Join, Leave, Subscribe, Unsubscribe, Publish, UDP message, communicate_client.c, all helper functions, all network part
 - Minrui Tian : Ping, Subscribe, Unsubscribe
 
-## How to run:
+## How to run test:
 
 Open a terminal window:
 
 1. ```make -f Makefile.communicate```
 
-2. ```gcc -o communicate_client2 communicate_client2.c communicate_clnt.c communicate_xdr.c -pthread```
+2. ```./communicate_server```
 
-3. ```./communicate_server```
+3. ```./communicate_client hostname```
 
-Then open another terminal window:
-```./communicate_client localhost```
-
-Then open another terminal window:
-```./communicate_client2 localhost```
+## How to use as a service:
+- compile and run communicate_client2.c
 
 ## Design document describing each component.
 
