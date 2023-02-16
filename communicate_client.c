@@ -12,9 +12,9 @@
 #include <netdb.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <assert.h>
+#include <stdbool.h>
 
-#define MYPORT "8083"
-#define MYPORT2 "2333"
 #define MAXBUFLEN 100
 
 CLIENT *rpc_setup(char *host) {
@@ -100,117 +100,49 @@ void *check_server_status(void* arg)
     }
 }
 
+
 void communicate_prog_1(char *host) {
-    CLIENT *clnt;
 
-    char *client_IP;
-    int client_Port; 
-
-    int sockfd = create_client_with_IP_and_Port(&client_IP, &client_Port, 1234);
-
-    bool_t *result_1;
-    bool_t  *result_2;
-
-
-
-	bool_t  *result_3;
-
-
-    bool_t  *result_4;
-
-
-    // /* Create a socket */
-    // int sockfd;
-    // struct sockaddr_in cli_addr;
-
-    // if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-    //     printf("\n Socket creation error \n");
-    //     return;
-    // }
-
-    // memset(&cli_addr, '0', sizeof(cli_addr));
-
-    // /* Hardcoded IP and Port for every client*/
-    // cli_addr.sin_family = AF_INET;
-    // cli_addr.sin_port = htons(atoi(MYPORT));
-    // cli_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-
-    // /* Bind the socket to a specific port */
-    // if (bind(sockfd, (const struct sockaddr *) &cli_addr, sizeof(cli_addr)) < 0) {
-    //     printf("\nBind failed\n");
-    //     return;
-    // }
-
-    // /* Set IP and Port */
-    // struct sockaddr_in tmp_addr;
-    // socklen_t len = sizeof(tmp_addr);
-    // getsockname(sockfd, (struct sockaddr *) &tmp_addr, &len);
-    // client_IP = inet_ntoa(tmp_addr.sin_addr);
-    // client_Port = ntohs(tmp_addr.sin_port);
-
-    // printf("Client IP: %s, Port: %d\n", client_IP, client_Port);
-
-
-
-    /* Send RPC request to the server */
-    clnt = rpc_setup(host);
-    result_1 = join_1(client_IP, client_Port, clnt);
-    if (result_1 == (bool_t *) NULL) {
-        clnt_perror (clnt, "call failed");
-    }
-
-    //set up another client
+    CLIENT *clnt1;
     CLIENT *clnt2;
-    clnt2 = clnt_create(host, COMMUNICATE_PROG, COMMUNICATE_VERSION, "udp");
-    if (clnt2 == NULL) {
-        clnt_pcreateerror(host);
-        exit(1);
+    CLIENT *clnt3;
+
+    char *cli1_IP;
+    char *cli2_IP;
+    char *cli3_IP;
+    int cli1_Port; 
+    int cli2_Port; 
+    int cli3_Port; 
+
+    int sockfd1 = create_client_with_IP_and_Port(&cli1_IP, &cli1_Port, 1234);
+    int sockfd2 = create_client_with_IP_and_Port(&cli2_IP, &cli2_Port,7777);
+    int sockfd3 = create_client_with_IP_and_Port(&cli3_IP, &cli3_Port, 6366);
+    clnt1 = rpc_setup(host);
+    clnt2 = rpc_setup(host);
+    clnt3 = rpc_setup(host);
+
+    //test three clients join
+    bool_t * cli1_join;
+    cli1_join = join_1(cli1_IP, cli1_Port, clnt1);
+    if (cli1_join == (bool_t *) NULL) {
+        clnt_perror (clnt1, "call failed");
+    }
+    
+
+    bool_t *cli2_join;
+    cli2_join = join_1(cli2_IP, cli2_Port, clnt2);
+    if (cli2_join == (bool_t *) NULL) {
+        clnt_perror (clnt2, "call failed");
     }
 
-        char *client_IP2;
-    int client_Port2; 
-
-     /* Create a socket */
-    int sockfd2;
-    struct sockaddr_in cli2_addr;
-
-    if ((sockfd2 = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        printf("\n Socket creation error \n");
-        return;
+    bool_t *cli3_join;
+    cli3_join = join_1(cli3_IP, cli3_Port, clnt3);
+    if (cli3_join == (bool_t *) NULL) {
+        clnt_perror (clnt3, "call failed");
     }
 
-    memset(&cli2_addr, '0', sizeof(cli2_addr));
 
-    /* Hardcoded IP and Port for every client*/
-    cli2_addr.sin_family = AF_INET;
-    cli2_addr.sin_port = htons(atoi(MYPORT2));
-    cli2_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-
-    /* Bind the socket to a specific port */
-    if (bind(sockfd2, (const struct sockaddr *) &cli2_addr, sizeof(cli2_addr)) < 0) {
-        printf("\nBind failed\n");
-        return;
-    }
-
-    /* Set IP and Port */
-    struct sockaddr_in tmp_addr2;
-    socklen_t len2 = sizeof(tmp_addr2);
-    getsockname(sockfd2, (struct sockaddr *) &tmp_addr2, &len2);
-    client_IP2 = inet_ntoa(tmp_addr2.sin_addr);
-    client_Port2 = ntohs(tmp_addr2.sin_port);
-
-    printf("Client2 IP: %s, Port: %d\n", client_IP2, client_Port2);
-
-        bool_t *join_res;
-        join_res = join_1(client_IP2, client_Port2, clnt2);
-    if (join_res == (bool_t *) NULL) {
-        clnt_perror (clnt, "call failed");
-    }
-
-    ////////////////////////////////
-
-
-
+    //test subscribe
     bool_t  *a;
     bool_t  *b;
     bool_t  *c;
@@ -224,58 +156,102 @@ void communicate_prog_1(char *host) {
     char * str6 = ";;;whatabout";
     char * str7 = "Entertainment;Carrie's Eating Club;CSBSJU;NoEntertainmentInCSBSJU";
 
-    a = subscribe_1(client_IP, client_Port, str1, clnt);
-    b = subscribe_1(client_IP, client_Port, str2, clnt);
-    c = subscribe_1(client_IP, client_Port, str3, clnt);
-    d = subscribe_1(client_IP, client_Port, str4, clnt);
-    e = subscribe_1(client_IP, client_Port, str5, clnt);
+    a = subscribe_1(cli1_IP, cli1_Port, str1, clnt1);
+    b = subscribe_1(cli1_IP, cli1_Port, str2, clnt1);
+    c = subscribe_1(cli1_IP, cli1_Port, str3, clnt1);
+    d = subscribe_1(cli1_IP, cli1_Port, str4, clnt1);
+    e = subscribe_1(cli1_IP, cli1_Port, str5, clnt1);
 
-    //client1 unsub
+    assert(a != NULL);
+    if (*a) {
+        assert(*a == 1); 
+    } 
+    assert(b != NULL);
+    if (*b) {
+        assert(*b == 1); 
+    }
+    assert(c != NULL);
+    if (*c) {
+        assert(*c == 1); 
+    }
+    assert(d != NULL);
+    if (*d) {
+        assert(*d == 0); 
+    }
+    assert(e != NULL);
+    if (*e) {
+        assert(*a == 0); 
+    }
+
+    //test unsubscibe
     bool_t *cli1_unsub1;
     bool_t *cli1_unsub2;
-	cli1_unsub1 = unsubscribe_1(client_IP, client_Port, str2, clnt);
-	cli1_unsub2 = unsubscribe_1(client_IP, client_Port, str2, clnt);
+	cli1_unsub1 = unsubscribe_1(cli1_IP, cli1_Port, str2, clnt1);
+	cli1_unsub2 = unsubscribe_1(cli1_IP, cli1_Port, str2, clnt1);
 
+    assert(cli1_unsub1 != NULL);
+    if (*cli1_unsub1) {
+        assert(*cli1_unsub1 == 1); 
+    } 
+    assert(cli1_unsub2 != NULL);
+    if (*cli1_unsub2) {
+        assert(*cli1_unsub2 == 0); 
+    }
 
-
-    //client2 publich
+    //test publish
     bool_t  *cli2_publish1;
     bool_t  *cli2_publish2;
+    bool_t  *cli3_publish3;
     char * matched_str = "Sports; org; ;soccer game";
+    char * another_matched_str = ";ori;org ;blahblah";
     char * unmatched_str = "Politics;;;Trump did what";
-    cli2_publish1 = publish_1(matched_str, client_IP2, client_Port2,clnt2);
-    cli2_publish2 = publish_1(unmatched_str, client_IP2, client_Port2, clnt2);
+    cli2_publish1 = publish_1(matched_str, cli2_IP, cli2_Port,clnt2); //clnt1 receive
+    cli2_publish2 = publish_1(unmatched_str, cli2_IP, cli2_Port, clnt2);
+    cli2_publish2 = publish_1(another_matched_str, cli2_IP, cli2_Port, clnt2); //clnt1 receive
+
 
     bool_t  *p1;
-    bool_t  *p2;
-    bool_t  *p3;
-    bool_t  *p4;
-    bool_t  *p5;
-    bool_t  *p6;
     bool_t  *p7;
-    p1 = publish_1(str1, client_IP, client_Port,clnt);
-    p2 = publish_1(str2, client_IP, client_Port, clnt);
-    p3 = publish_1(str3, client_IP, client_Port, clnt);
-    p4 = publish_1(str4, client_IP, client_Port, clnt);
-    p5 = publish_1(str5, client_IP, client_Port, clnt);
-    p6 = publish_1(str6, client_IP, client_Port, clnt);
-    p7 = publish_1(str7, client_IP, client_Port, clnt);
+    char * empty_str = ";;;";
+    p7 = publish_1(str7, cli2_IP, cli2_Port, clnt2);
 
+    assert(p7 != NULL);
+    if (*p7) {
+        assert(*p7 == 1); 
+    }
+
+    //test leave
+    bool_t  *cli1_leave_success;
+    bool_t  *cli1_leave_failed;
+    cli1_leave_success = leave_1(cli2_IP, cli2_Port, clnt2);
+    cli1_leave_failed = leave_1(cli2_IP, cli2_Port, clnt2);
+
+    assert(cli1_leave_success != NULL);
+    if (*cli1_leave_success) {
+        assert(*cli1_leave_success == 1); 
+    } 
+    assert(cli1_leave_failed != NULL);
+    if (*cli1_leave_failed) {
+        assert(*cli1_leave_failed == 0); 
+    }
+	
     /* Create a thread to receive UDP messages from the server */
     pthread_t udp_thread;
-    if (pthread_create(&udp_thread, NULL, receive_udp_message, &sockfd)) {
+    if (pthread_create(&udp_thread, NULL, receive_udp_message, &sockfd1)) {
         printf("\n Error creating UDP message receive thread\n");
         return;
     }
 
     /* Create a thread to periodically ping the server */
     pthread_t ping_thread;
-    if (pthread_create(&ping_thread, NULL, check_server_status, clnt) < 0) {
+    if (pthread_create(&ping_thread, NULL, check_server_status, clnt1) < 0) {
         printf("\n Error creating ping thread\n");
         return;
     } 
 
-    clnt_destroy (clnt);
+    clnt_destroy (clnt1);
+    clnt_destroy (clnt2);
+    clnt_destroy (clnt3);
 }
 
 int main(int argc, char *argv[]) {
