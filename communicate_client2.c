@@ -167,7 +167,6 @@ void communicate_prog_1(char *host) {
     }
     } else {
         printf("Invalid command: %s\n", command);
-        return 1;
     }
     memset(command,'\0', sizeof(char)*MAXSTRING); //clean up input buffer every time
     memset(article,'\0', sizeof(char)*MAXSTRING);
