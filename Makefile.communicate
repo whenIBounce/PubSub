@@ -22,7 +22,7 @@ OBJECTS_SVC = $(SOURCES_SVC.c:%.c=%.o) $(TARGETS_SVC.c:%.c=%.o)
 
 CFLAGS += -g -DRPC_SVC_FG -DRPC_CLNT_FG
 LDLIBS += -lnsl -pthread
-RPCGENFLAGS = -C
+RPCGENFLAGS = -C -N
 
 # Targets 
 
@@ -41,6 +41,6 @@ $(CLIENT) : $(OBJECTS_CLNT)
 $(SERVER) : $(OBJECTS_SVC) 
 	$(LINK.c) -o $(SERVER) $(OBJECTS_SVC) $(LDLIBS)
 
- clean:
-	 $(RM) core $(TARGETS) $(OBJECTS_CLNT) $(OBJECTS_SVC) $(CLIENT) $(SERVER)
+clean:
+	rm -f communicate_client communicate_client.o communicate_server communicate_server.o communicate_clnt.* communicate_svc.*  communicate.h
 

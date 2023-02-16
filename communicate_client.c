@@ -34,7 +34,7 @@ void* receive_udp_message(void* arg) {
     char buf[MAXBUFLEN];
     struct sockaddr_storage sender_addr;
     socklen_t addr_len = sizeof(sender_addr);
-
+    printf("wulalalalalalalalalaalaalalalalalala\n");
     while (1) {
         int numbytes = recvfrom(sockfd, buf, MAXBUFLEN-1 , 0, (struct sockaddr *)&sender_addr, &addr_len);
         if (numbytes == -1) {
@@ -56,34 +56,33 @@ void *check_server_status(void* arg)
         sleep(2);
         if (ping_1(clnt) == (bool_t *)NULL)
         {
-            printf("server is down\n");
+            printf("Server is down\n");
             clnt_destroy(clnt);
             exit(1);
+        }else{
+            printf("Server still running\n");
         }
     }
 }
 
-
 void communicate_prog_1(char *host) {
     CLIENT *clnt;
 
+    char *client_IP;
+    int client_Port; 
+
     bool_t *result_1;
-    char *join_1_IP;
-    int join_1_Port;
 
     bool_t  *result_2;
-	char *leave_1_IP;
-	int leave_1_Port;
+
 
 
 	bool_t  *result_3;
-	char *subscribe_1_IP;
-	int subscribe_1_Port;
+
 	char *subscribe_1_Article = "Health;oo;haha;";
 
     bool_t  *result_4;
-	char *unsubscribe_1_IP;
-	int unsubscribe_1_Port;
+
 	char *unsubscribe_1_Article = "Health;oo;haha;";
 
     /* Create a socket */
@@ -112,33 +111,55 @@ void communicate_prog_1(char *host) {
     struct sockaddr_in tmp_addr;
     socklen_t len = sizeof(tmp_addr);
     getsockname(sockfd, (struct sockaddr *) &tmp_addr, &len);
-    join_1_IP = inet_ntoa(tmp_addr.sin_addr);
-    join_1_Port = ntohs(tmp_addr.sin_port);
-    leave_1_IP = join_1_IP;
-    leave_1_Port = join_1_Port;
-    subscribe_1_IP = join_1_IP;
-    subscribe_1_Port = join_1_Port;
-    unsubscribe_1_IP = join_1_IP;
-    unsubscribe_1_Port = join_1_Port;
+    client_IP = inet_ntoa(tmp_addr.sin_addr);
+    client_Port = ntohs(tmp_addr.sin_port);
 
-    printf("Client IP: %s, Port: %d\n", join_1_IP, join_1_Port);
+    printf("Client IP: %s, Port: %d\n", client_IP, client_Port);
+
+    
 
     /* Send RPC request to the server */
     clnt = rpc_setup(host);
-    result_1 = join_1(join_1_IP, join_1_Port, clnt);
+    result_1 = join_1(client_IP, client_Port, clnt);
     if (result_1 == (bool_t *) NULL) {
         clnt_perror (clnt, "call failed");
     }
 
-	result_3 = subscribe_1(subscribe_1_IP, subscribe_1_Port, subscribe_1_Article, clnt);
+	result_3 = subscribe_1(client_IP, client_Port, subscribe_1_Article, clnt);
 	if (result_3 == (bool_t *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
 
+    bool_t  *a;
+    bool_t  *b;
+    bool_t  *c;
+    bool_t  *d;
+    bool_t  *e;
+    char * str1 = "Sports; org; ;";
+    char * str2 = "Politics;ori; ;";
+    char * str3 = ";ori;org ;";
+    char * str4 = ";ori;org ;contents";
+    char * str5 = "gaga;ss;ss;ss";
+
+    a = subscribe_1(client_IP, client_Port, str1, clnt);
+    b = subscribe_1(client_IP, client_Port, str2, clnt);
+    c = subscribe_1(client_IP, client_Port, str3, clnt);
+    d = subscribe_1(client_IP, client_Port, str4, clnt);
+    e = subscribe_1(client_IP, client_Port, str5, clnt);
+
+    bool_t  *p1;
+    bool_t  *p2;
+    bool_t  *p3;
+    bool_t  *p4;
+    bool_t  *p5;
+
+
+
+
     /* Create a thread to receive UDP messages from the server */
-    pthread_t thread;
-    if (pthread_create(&thread, NULL, receive_udp_message, &sockfd)) {
-        printf("\n Error creating receive thread\n");
+    pthread_t udp_thread;
+    if (pthread_create(&udp_thread, NULL, receive_udp_message, &sockfd)) {
+        printf("\n Error creating UDP message receive thread\n");
         return;
     }
 
