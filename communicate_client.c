@@ -14,6 +14,7 @@
 #include <unistd.h>
 
 #define MYPORT "8083"
+#define MYPORT2 "2333"
 #define MAXBUFLEN 100
 
 CLIENT *rpc_setup(char *host) {
@@ -34,7 +35,6 @@ void* receive_udp_message(void* arg) {
     char buf[MAXBUFLEN];
     struct sockaddr_storage sender_addr;
     socklen_t addr_len = sizeof(sender_addr);
-    printf("wulalalalalalalalalaalaalalalalalala\n");
     while (1) {
         int numbytes = recvfrom(sockfd, buf, MAXBUFLEN-1 , 0, (struct sockaddr *)&sender_addr, &addr_len);
         if (numbytes == -1) {
@@ -42,7 +42,7 @@ void* receive_udp_message(void* arg) {
             exit(1);
         }
         buf[numbytes] = '\0';
-        printf("Received UDP message from server: %s\n", buf);
+        printf("Received subsribed article from server: %s\n", buf);
     }
 
     pthread_exit(NULL);
@@ -121,6 +121,58 @@ void communicate_prog_1(char *host) {
         clnt_perror (clnt, "call failed");
     }
 
+    //set up another client
+    CLIENT *clnt2;
+    clnt2 = clnt_create(host, COMMUNICATE_PROG, COMMUNICATE_VERSION, "udp");
+    if (clnt2 == NULL) {
+        clnt_pcreateerror(host);
+        exit(1);
+    }
+
+        char *client_IP2;
+    int client_Port2; 
+
+     /* Create a socket */
+    int sockfd2;
+    struct sockaddr_in cli2_addr;
+
+    if ((sockfd2 = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        printf("\n Socket creation error \n");
+        return;
+    }
+
+    memset(&cli2_addr, '0', sizeof(cli2_addr));
+
+    /* Hardcoded IP and Port for every client*/
+    cli2_addr.sin_family = AF_INET;
+    cli2_addr.sin_port = htons(atoi(MYPORT2));
+    cli2_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    /* Bind the socket to a specific port */
+    if (bind(sockfd2, (const struct sockaddr *) &cli2_addr, sizeof(cli2_addr)) < 0) {
+        printf("\nBind failed\n");
+        return;
+    }
+
+    /* Set IP and Port */
+    struct sockaddr_in tmp_addr2;
+    socklen_t len2 = sizeof(tmp_addr2);
+    getsockname(sockfd2, (struct sockaddr *) &tmp_addr2, &len);
+    client_IP2 = inet_ntoa(tmp_addr2.sin_addr);
+    client_Port2 = ntohs(tmp_addr2.sin_port);
+
+    printf("Client2 IP: %s, Port: %d\n", client_IP2, client_Port2);
+
+        bool_t *join_res;
+        join_res = join_1(client_IP2, client_Port2, clnt2);
+    if (join_res == (bool_t *) NULL) {
+        clnt_perror (clnt, "call failed");
+    }
+
+    ////////////////////////////////
+
+
+
     bool_t  *a;
     bool_t  *b;
     bool_t  *c;
@@ -139,6 +191,22 @@ void communicate_prog_1(char *host) {
     c = subscribe_1(client_IP, client_Port, str3, clnt);
     d = subscribe_1(client_IP, client_Port, str4, clnt);
     e = subscribe_1(client_IP, client_Port, str5, clnt);
+
+    //client1 unsub
+    bool_t *cli1_unsub1;
+    bool_t *cli1_unsub2;
+	cli1_unsub1 = unsubscribe_1(client_IP, client_Port, str2, clnt);
+	cli1_unsub2 = unsubscribe_1(client_IP, client_Port, str2, clnt);
+
+
+
+    //client2 publich
+    bool_t  *cli2_publish1;
+    bool_t  *cli2_publish2;
+    char * matched_str = "Sports; org; ;soccer game";
+    char * unmatched_str = "Politics;;;Trump did what";
+    cli2_publish1 = publish_1(matched_str, client_IP2, client_Port2,clnt2);
+    cli2_publish2 = publish_1(unmatched_str, client_IP2, client_Port2, clnt2);
 
     bool_t  *p1;
     bool_t  *p2;

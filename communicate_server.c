@@ -239,7 +239,6 @@ bool_t isArticleValid(char *article, int flag) //flag = 1, check for subscriptio
     return 1;
 }
 
-
 /* Check if the article is already subscribed */
 bool_t alreadySubscribed(int clientIndex, char *Article)
 {
@@ -406,6 +405,14 @@ unsubscribe_1_svc(char *IP, int Port, char *Article, struct svc_req *rqstp)
         return &result;
     }
 
+    int flag = 1;
+    if (!isArticleValid(Article, flag))
+    {
+        result = 0;
+        printf("Unsubscribe Failed, Article '%s' is not valid for subscription.\n", Article);
+        return &result;
+    }
+
     int clientIndex = -1;
     for (int i = 0; i < numClients; i++)
     {
@@ -415,32 +422,33 @@ unsubscribe_1_svc(char *IP, int Port, char *Article, struct svc_req *rqstp)
             break;
         }
     }
-    int flag = 1;
-    if (!isArticleValid(Article, flag))
-    {
-        result = 0;
-        printf("Unsubscribe Failed, Article '%s' is not valid for subscription.\n", Article);
-        return &result;
-    }
+
+    char ** fields;
+    fields = NULL;
+    int count = split(Article,&fields); 
 
     bool_t unsubscribed = 0;
-    for (int i = 0; i < clients[clientIndex].numSubscriptions; i++)
+    for (int j = 0; j < clients[clientIndex].numSubscriptions; j++)
     {
-        char subscribedType[MAXSTRING], subscribedOriginator[MAXSTRING], subscribedOrg[MAXSTRING];
-        sscanf(clients[clientIndex].subscriptions[i], "%[^;];%[^;];%[^;];", subscribedType, subscribedOriginator, subscribedOrg);
-        char articleType[MAXSTRING], articleOriginator[MAXSTRING], articleOrg[MAXSTRING];
-        sscanf(Article, "%[^;];%[^;];%[^;];", articleType, articleOriginator, articleOrg);
-        if (strcmp(subscribedType, articleType) == 0 && strcmp(subscribedOriginator, articleOriginator) == 0 && strcmp(subscribedOrg, articleOrg) == 0)
-        {
-            // Remove the subscription
-            for (int j = i; j < clients[clientIndex].numSubscriptions - 1; j++)
+
+            char **subFields;
+            subFields = NULL;
+            int subCount = split(clients[clientIndex].subscriptions[j],&subFields);
+
+            // Check if the client has subscribed to the article being published
+            if (strcmp(fields[0], subFields[0]) == 0 &&
+                (strcmp(subFields[1], fields[1]) == 0) &&
+                (strcmp(subFields[2], fields[2]) == 0))
             {
-                strcpy(clients[clientIndex].subscriptions[j], clients[clientIndex].subscriptions[j + 1]);
+            // Remove the subscription
+                for (int k = j; k < clients[clientIndex].numSubscriptions - 1; k++)
+                {
+                    strcpy(clients[clientIndex].subscriptions[k], clients[clientIndex].subscriptions[k + 1]);
+                }
+                clients[clientIndex].numSubscriptions--;
+                unsubscribed = 1;
+                break;
             }
-            clients[clientIndex].numSubscriptions--;
-            unsubscribed = 1;
-            break;
-        }
     }
 
     if (unsubscribed)
@@ -471,6 +479,10 @@ publish_1_svc(char *Article, char *IP, int Port, struct svc_req *rqstp)
         return &result;
     }
 
+    char ** fields;
+    fields = NULL;
+    int count = split(Article,&fields); 
+
     // Find all clients who have subscribed to the publishing article
     for (int i = 0; i < numClients; i++)
     {
@@ -480,20 +492,19 @@ publish_1_svc(char *Article, char *IP, int Port, struct svc_req *rqstp)
             continue;
         }
 
-        char articleType[MAXSTRING], articleOriginator[MAXSTRING], articleOrg[MAXSTRING], contents[MAXSTRING];
-        sscanf(Article, "%[^;];%[^;];%[^;];%s", articleType, articleOriginator, articleOrg, contents);
-
         for (int j = 0; j < clients[i].numSubscriptions; j++)
         {
-            char subscribedType[MAXSTRING], subscribedOriginator[MAXSTRING], subscribedOrg[MAXSTRING];
-            sscanf(clients[i].subscriptions[j], "%[^;];%[^;];%[^;];", subscribedType, subscribedOriginator, subscribedOrg);
+            char **subFields;
+            subFields = NULL;
+            int subCount = split(clients[i].subscriptions[j],&subFields);
 
             // Check if the client has subscribed to the article being published
-            if (strcmp(subscribedType, articleType) == 0 &&
-                (subscribedOriginator[0] == '\0' || strcmp(subscribedOriginator, articleOriginator) == 0) &&
-                (subscribedOrg[0] == '\0' || strcmp(subscribedOrg, articleOrg) == 0))
+            if (strcmp(fields[0], subFields[0]) == 0 &&
+                (subFields[1][0] == '\0' || strcmp(subFields[1], fields[1]) == 0) &&
+                (subFields[2][0] == '\0' || strcmp(subFields[2], fields[2]) == 0))
             {
                 // Send the matching article to the client
+                printf("Article : %s matched", Article);
                 send_message(clients[i].IP, clients[i].Port, Article);
                 break;
             }
