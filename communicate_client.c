@@ -29,6 +29,41 @@ CLIENT *rpc_setup(char *host) {
     return clnt;
 }
 
+int create_client_with_IP_and_Port(char **Client_IP, int* Client_Port, int Hardcoded_port_num){
+     /* Create a socket */
+    int sockfd;
+    struct sockaddr_in cli_addr;
+
+    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        printf("\n Socket creation error \n");
+        return 0;
+    }
+
+    memset(&cli_addr, '0', sizeof(cli_addr));
+
+    /* Hardcoded IP and Port for every client*/
+    cli_addr.sin_family = AF_INET;
+    cli_addr.sin_port = htons(Hardcoded_port_num);
+    cli_addr.sin_addr.s_addr = inet_addr("127.0.0.1"); //same IP for diff clients
+
+    /* Bind the socket to a specific port */
+    if (bind(sockfd, (const struct sockaddr *) &cli_addr, sizeof(cli_addr)) < 0) {
+        printf("\nBind failed\n");
+        return 0;
+    }
+
+    /* Set IP and Port */
+    struct sockaddr_in tmp_addr;
+    socklen_t len = sizeof(tmp_addr);
+    getsockname(sockfd, (struct sockaddr *) &tmp_addr, &len);
+    *Client_IP = inet_ntoa(tmp_addr.sin_addr);
+    *Client_Port = ntohs(tmp_addr.sin_port);
+
+    printf("Client IP: %s, Port: %d\n", *Client_IP, *Client_Port);
+
+    return sockfd;
+}
+
 
 void* receive_udp_message(void* arg) {
     int sockfd = *(int*)arg;
@@ -71,6 +106,8 @@ void communicate_prog_1(char *host) {
     char *client_IP;
     int client_Port; 
 
+    int sockfd = create_client_with_IP_and_Port(&client_IP, &client_Port, 1234);
+
     bool_t *result_1;
     bool_t  *result_2;
 
@@ -82,36 +119,37 @@ void communicate_prog_1(char *host) {
     bool_t  *result_4;
 
 
-    /* Create a socket */
-    int sockfd;
-    struct sockaddr_in cli_addr;
+    // /* Create a socket */
+    // int sockfd;
+    // struct sockaddr_in cli_addr;
 
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        printf("\n Socket creation error \n");
-        return;
-    }
+    // if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+    //     printf("\n Socket creation error \n");
+    //     return;
+    // }
 
-    memset(&cli_addr, '0', sizeof(cli_addr));
+    // memset(&cli_addr, '0', sizeof(cli_addr));
 
-    /* Hardcoded IP and Port for every client*/
-    cli_addr.sin_family = AF_INET;
-    cli_addr.sin_port = htons(atoi(MYPORT));
-    cli_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    // /* Hardcoded IP and Port for every client*/
+    // cli_addr.sin_family = AF_INET;
+    // cli_addr.sin_port = htons(atoi(MYPORT));
+    // cli_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
-    /* Bind the socket to a specific port */
-    if (bind(sockfd, (const struct sockaddr *) &cli_addr, sizeof(cli_addr)) < 0) {
-        printf("\nBind failed\n");
-        return;
-    }
+    // /* Bind the socket to a specific port */
+    // if (bind(sockfd, (const struct sockaddr *) &cli_addr, sizeof(cli_addr)) < 0) {
+    //     printf("\nBind failed\n");
+    //     return;
+    // }
 
-    /* Set IP and Port */
-    struct sockaddr_in tmp_addr;
-    socklen_t len = sizeof(tmp_addr);
-    getsockname(sockfd, (struct sockaddr *) &tmp_addr, &len);
-    client_IP = inet_ntoa(tmp_addr.sin_addr);
-    client_Port = ntohs(tmp_addr.sin_port);
+    // /* Set IP and Port */
+    // struct sockaddr_in tmp_addr;
+    // socklen_t len = sizeof(tmp_addr);
+    // getsockname(sockfd, (struct sockaddr *) &tmp_addr, &len);
+    // client_IP = inet_ntoa(tmp_addr.sin_addr);
+    // client_Port = ntohs(tmp_addr.sin_port);
 
-    printf("Client IP: %s, Port: %d\n", client_IP, client_Port);
+    // printf("Client IP: %s, Port: %d\n", client_IP, client_Port);
+
 
 
     /* Send RPC request to the server */
@@ -157,7 +195,7 @@ void communicate_prog_1(char *host) {
     /* Set IP and Port */
     struct sockaddr_in tmp_addr2;
     socklen_t len2 = sizeof(tmp_addr2);
-    getsockname(sockfd2, (struct sockaddr *) &tmp_addr2, &len);
+    getsockname(sockfd2, (struct sockaddr *) &tmp_addr2, &len2);
     client_IP2 = inet_ntoa(tmp_addr2.sin_addr);
     client_Port2 = ntohs(tmp_addr2.sin_port);
 
