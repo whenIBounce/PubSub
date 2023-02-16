@@ -3,7 +3,7 @@
 ## Group Member and Contribution
 - Yidan Wang : Testing
 - Tianhong Zhang : Join, Leave, Subscribe, Unsubscribe, Publish, UDP message, communicate_client.c
-- Minrui Tian : Ping, Subscribe, Unsubscribe
+- Minrui Tian : Ping, Subscribe, Unsubscribe，thread handling, general code design.
 
 ## How to run:
 
@@ -11,15 +11,19 @@ Open a terminal window:
 
 1. ```make -f Makefile.communicate```
 
-2. ```gcc -o communicate_client2 communicate_client2.c communicate_clnt.c communicate_xdr.c -pthread```
+2. ```./communicate_server```
 
-3. ```./communicate_server```
-
-Then open another terminal window:
+3. Then open another terminal window:
 ```./communicate_client localhost```
 
-Then open another terminal window:
-```./communicate_client2 localhost```
+4. Input your command of choice from (subscribe,unsubscribe,publish), a white space and your article of choice.
+
+or input leave/ping, a white space and server.
+Example: ```subscribe Sports; org; ;```, ```publish Sports; org; ;``` , ```leave server```.
+
+5. You can open more terminal to run multiple clients at the same time based on step 3 and 4.
+
+
 
 ## Design document describing each component.
 
